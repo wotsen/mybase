@@ -74,52 +74,123 @@ version_log = {
 }
 
 MIT_LICENSE = Template("""
-MIT License
-
-Copyright (c) ${year} ${author}
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+ * MIT License
+ * 
+ * Copyright (c) ${year} ${author}
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
 """)
 BSD_LICENSE = Template("""
-BSD License
-
-Copyright (c) ${year} ${author}
-
-Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, 
-BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
-IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, 
-OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
-OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
-OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * BSD License
+ * 
+ * Copyright (c) ${year} ${author}
+ * 
+ * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, 
+ * BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+ * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, 
+ * OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, 
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """)
 
 LICENSES = {
-    "MIT": MIT_LICENSE
+    "MIT": MIT_LICENSE,
+    "BSD": BSD_LICENSE
 }
+
+C_FILE_HEAD = Template("""/**
+ * @file ${name}.c
+ * @author ${author} (${email})
+ * @brief 
+ * @version 0.0.0
+ * @date ${date}
+ * 
+ * @copyright ${license}
+ * 
+ */
+
+#include "${name}.h"
+""")
+
+C_H_FILE_HEAD = Template("""/**
+ * @file ${name}.h
+ * @author ${author} (${email})
+ * @brief 
+ * @version 0.0.0
+ * @date ${date}
+ * 
+ * @copyright ${license}
+ * 
+ */
+
+#ifndef __${project}_${head}_H__
+#define __${project}_${head}_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // !__${project}_${head}_H__
+""")
+
+CXX_FILE_HEAD = Template("""/**
+ * @file ${name}.cpp
+ * @author ${author} (${email})
+ * @brief 
+ * @version 0.0.0
+ * @date ${date}
+ * 
+ * @copyright ${license}
+ * 
+ */
+
+#include "${name}.h"
+""")
+
+CXX_H_FILE_HEAD = Template("""/**
+ * @file ${name}.h
+ * @author ${author} (${email})
+ * @brief 
+ * @version 0.0.0
+ * @date ${date}
+ * 
+ * @copyright ${license}
+ * 
+ */
+
+#ifndef __${project}_${head}_H__
+#define __${project}_${head}_H__
+
+#endif // !__${project}_${head}_H__
+""")
 
 def check_name(anwser, name):
     """检查名称，只能是数字、字母 、下划线、横线
@@ -193,10 +264,24 @@ def new_dir(path, root=None):
         _path = os.path.join(root, path)
 
     if os.access(_path, os.F_OK):
-        raise ValueError("direct [%s] exsit." % path)
+        raise ValueError("direct [%s] exist." % path)
     
     print("create direct : %s" % path)
     os.mkdir(_path)
+
+
+def read_config(path):
+    if not os.path.exists("config.json"):
+        print("no config.json")
+        return None
+
+    with open("config.json", "r", encoding="utf8") as f:
+        try:
+            config = json.load(f)
+            return config
+        except Exception as e:
+            print("read config error : ", e)
+            return None
 
 
 class Project:
@@ -298,6 +383,8 @@ class Project:
             version_log["version"][0]["version"] = "0.0.0"
             version_log["version"][0]["time"] = time.asctime(time.localtime(time.time()))
             f.write(json.dumps(version_log, indent=4))
+        
+        print("create project : %s success." % config_template["project"]["name"])
 
     def create_c_file(self, name):
         """
@@ -305,15 +392,122 @@ class Project:
         创建c源码文件，会同时创建对应的头文件.
         :param name: 文件名称，可以不添加文件后缀
         """
-        pass
+        self._config = read_config("config.json")
+        if not self._config:
+            exit(0)
+        
+        base_dir = os.path.dirname(name)
+        base_name = os.path.basename(name)
+        name_prev = os.path.splitext(base_name)[0]
+
+        if not os.path.isdir(base_dir):
+            print("file base path : %s not exist." % base_dir)
+            exit(0)
+
+        if base_dir and "/" in base_dir:
+            # 获取一级目录
+            idx = base_dir.index("/")
+            if idx:
+                if base_dir[0:idx] not in ["src", "test"]:
+                    print("not support file base dir path : %s" % base_dir)
+                    exit(0)
+            else:
+                print("please input base dir path : [src|test]/%s" % base_dir)
+                exit(0)
+        elif base_dir in ["src", "test"]:
+            pass
+        else:
+            base_dir = "src"  # 默认创建到src目录
+        
+        # 冲突文件检测
+        if os.access(os.path.join(base_dir, name_prev + ".c"), os.F_OK)\
+            or os.access(os.path.join(base_dir, name_prev + ".h"), os.F_OK)\
+            or os.access(os.path.join(base_dir, name_prev + ".cpp"), os.F_OK):
+            print("file %s.[cpp|c|h] conflict." % os.path.join(base_dir, name_prev))
+            exit(0)
+        
+        print("create c file : %s" % os.path.join(base_dir, name_prev + ".c"))
+        with open(os.path.join(base_dir, name_prev + ".c"), "w", encoding="utf-8") as f:
+            f.write(C_FILE_HEAD.substitute(name=name_prev,
+                                           author=self._config["file"]["author"],
+                                           email=self._config["file"]["email"],
+                                           date=time.strftime("%Y-%m-%d", time.localtime()),
+                                           license=self._config["file"]["copyright"]))
+
+        print("create header file : %s" % os.path.join(base_dir, name_prev + ".h"))
+        with open(os.path.join(base_dir, name_prev + ".h"), "w", encoding="utf-8") as f:
+            _project = re.sub(r'-', r'_', self._config["project"]["name"])
+            f.write(C_H_FILE_HEAD.substitute(name=name_prev,
+                                           author=self._config["file"]["author"],
+                                           email=self._config["file"]["email"],
+                                           date=time.strftime("%Y-%m-%d", time.localtime()),
+                                           license=self._config["file"]["copyright"],
+                                           project=_project,
+                                           head=name_prev.upper()))
+        
+        # TODO:添加到编译
 
     def create_cpp_file(self, name):
         """
         创建c++源文件. \n
-        创建c++源码文件，会同时创建对应的头文件(.cpp, .h).
+        创建c++源码文件，只能在[src|test]目录创建源文件，会同时创建对应的头文件(.cpp, .h).
         :param name: 文件名称，可以不添加文件后缀
         """
-        pass
+        self._config = read_config("config.json")
+        if not self._config:
+            exit(0)
+        
+        base_dir = os.path.dirname(name)
+        base_name = os.path.basename(name)
+        name_prev = os.path.splitext(base_name)[0]
+
+        if not os.path.isdir(base_dir):
+            print("file base path : %s not exist." % base_dir)
+            exit(0)
+
+        if base_dir and "/" in base_dir:
+            # 获取一级目录
+            idx = base_dir.index("/")
+            if idx:
+                if base_dir[0:idx] not in ["src", "test"]:
+                    print("not support file base dir path : %s" % base_dir)
+                    exit(0)
+            else:
+                print("please input base dir path : [src|test]/%s" % base_dir)
+                exit(0)
+        elif base_dir in ["src", "test"]:
+            pass
+        else:
+            print("path error : %s" % name)
+            exit(0)
+        
+        # 冲突文件检测
+        if os.access(os.path.join(base_dir, name_prev + ".c"), os.F_OK)\
+            or os.access(os.path.join(base_dir, name_prev + ".h"), os.F_OK)\
+            or os.access(os.path.join(base_dir, name_prev + ".cpp"), os.F_OK):
+            print("file %s.[cpp|c|h] conflict." % os.path.join(base_dir, name_prev))
+            exit(0)
+        
+        print("create cpp file : %s" % os.path.join(base_dir, name_prev + ".cpp"))
+        with open(os.path.join(base_dir, name_prev + ".cpp"), "w", encoding="utf-8") as f:
+            f.write(CXX_FILE_HEAD.substitute(name=name_prev,
+                                           author=self._config["file"]["author"],
+                                           email=self._config["file"]["email"],
+                                           date=time.strftime("%Y-%m-%d", time.localtime()),
+                                           license=self._config["file"]["copyright"]))
+
+        print("create header file : %s" % os.path.join(base_dir, name_prev + ".h"))
+        with open(os.path.join(base_dir, name_prev + ".h"), "w", encoding="utf-8") as f:
+            _project = re.sub(r'-', r'_', self._config["project"]["name"])
+            f.write(CXX_H_FILE_HEAD.substitute(name=name_prev,
+                                           author=self._config["file"]["author"],
+                                           email=self._config["file"]["email"],
+                                           date=time.strftime("%Y-%m-%d", time.localtime()),
+                                           license=self._config["file"]["copyright"],
+                                           project=_project,
+                                           head=name_prev.upper()))
+        
+        # TODO:添加到编译
 
     def create_h_file(self, name):
         """
@@ -321,7 +515,51 @@ class Project:
         用于单独创建头文件.
         :param name: 文件名称，可以不添加文件后缀
         """
-        pass
+        self._config = read_config("config.json")
+        if not self._config:
+            exit(0)
+        
+        base_dir = os.path.dirname(name)
+        base_name = os.path.basename(name)
+        name_prev = os.path.splitext(base_name)[0]
+
+        if not os.path.isdir(base_dir):
+            print("file base path : %s not exist." % base_dir)
+            exit(0)
+        
+        if base_dir and "/" in base_dir:
+            # 获取一级目录
+            idx = base_dir.index("/")
+            if idx:
+                if base_dir[0:idx] not in ["src", "test"]:
+                    print("not support file base dir path : %s" % base_dir)
+                    exit(0)
+            else:
+                print("please input base dir path : [src|test]/%s" % base_dir)
+                exit(0)
+        elif base_dir in ["src", "test"]:
+            pass
+        else:
+            print("path error : %s" % name)
+            exit(0)
+        
+        # 冲突文件检测
+        if os.access(os.path.join(base_dir, name_prev + ".c"), os.F_OK)\
+            or os.access(os.path.join(base_dir, name_prev + ".h"), os.F_OK)\
+            or os.access(os.path.join(base_dir, name_prev + ".cpp"), os.F_OK):
+            print("file %s.[cpp|c|h] conflict." % os.path.join(base_dir, name_prev))
+            exit(0)
+        
+        print("create header file : %s" % os.path.join(base_dir, name_prev + ".h"))
+        with open(os.path.join(base_dir, name_prev + ".h"), "w", encoding="utf-8") as f:
+            _project = re.sub(r'-', r'_', self._config["project"]["name"])
+            f.write(CXX_H_FILE_HEAD.substitute(name=name_prev,
+                                           author=self._config["file"]["author"],
+                                           email=self._config["file"]["email"],
+                                           date=time.strftime("%Y-%m-%d", time.localtime()),
+                                           license=self._config["file"]["copyright"],
+                                           project=_project,
+                                           head=name_prev.upper()))
 
     def create_dir(self, name):
         """
@@ -329,7 +567,33 @@ class Project:
         用于创建目录，以项目路径为根路径，新增的[src|test]下的路径将用于编译，规则和普通路径一致.
         :param name: 目录路径
         """
-        pass
+        self._config = read_config("config.json")
+        if not self._config:
+            exit(0)
+        
+        base_dir = name
+        if os.access(base_dir, os.F_OK):
+            print("path : %s exist." % base_dir)
+            exit(0)
+
+        if base_dir and "/" in base_dir:
+            # 获取一级目录
+            idx = base_dir.index("/")
+            if idx:
+                if base_dir[0:idx] not in ["src", "test"]:
+                    print("not support file base dir path : %s" % base_dir)
+                    exit(0)
+            else:
+                print("please input base dir path : [src|test]/%s" % base_dir)
+                exit(0)
+        elif base_dir in ["src", "test"]:
+            pass
+        else:
+            print("path empty.")
+            exit(0)
+
+        print("create dir : %s" % base_dir)
+        os.makedirs(base_dir)
     
     def build(self, debug=False):
         """
