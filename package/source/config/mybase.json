@@ -1,0 +1,25 @@
+{
+	"module": {
+		"core": {
+			"children": [
+				{
+					"app log": {
+						"enable": true,
+						"level": "debug",
+						"path": "/usr/share/mybase/log/mybase.log"
+					}
+				}
+			],
+			"max module cnt": 1024,
+			"work mode": "mutli thread"
+		},
+		"app rpc": {
+			"net": {
+				"support tcp": true,
+				"support udp": false,
+				"listen port": 9000,
+				"max connectios": 100000
+			}
+		}
+	}
+}

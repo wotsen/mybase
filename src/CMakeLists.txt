@@ -1,0 +1,11 @@
+set(SRC_FILES
+	src/main.cpp
+	src/core/module.cpp
+	src/core/module_def.cpp
+	src/core/configure_def.cpp
+	src/core/configure.cpp
+	src/core/log.cpp
+	src/core/memory.cpp
+	src/core/version.cpp
+	src/app/mybase.cpp
+	PARENT_SCOPE)

@@ -1,0 +1,37 @@
+{
+	"app": {
+		"log lv": "debug",
+		"log": {
+			"enable": true,
+			"path": "../mybase.log"
+		}
+	},
+	"module": {
+		"core": {
+			"log lv": "debug",
+			"max module cnt": 1024,
+			"work mode": "mutli thread",
+			"children": [
+				{
+					"sys-mybase": {
+						"log lv": "debug"
+					}
+				},
+				{
+					"log": {
+						"log lv": "debug"
+					}
+				}
+			]
+		},
+		"app rpc": {
+			"log lv": "debug",
+			"net": {
+				"support tcp": true,
+				"support udp": false,
+				"listen port": 9000,
+				"max connectios": 100000
+			}
+		}
+	}
+}
